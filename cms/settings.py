@@ -2,7 +2,8 @@ import os
 
 from celery.schedules import crontab
 
-DEBUG = False
+DEBUG = True
+DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
 
 # PORTAL NAME, this is the portal title and
 # is also shown on several places as emails
@@ -365,7 +366,20 @@ if not os.path.isfile(error_filename):
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
     "handlers": {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
         "file": {
             "level": "ERROR",
             "class": "logging.FileHandler",
@@ -373,6 +387,11 @@ LOGGING = {
         },
     },
     "loggers": {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         "django": {
             "handlers": ["file"],
             "level": "ERROR",

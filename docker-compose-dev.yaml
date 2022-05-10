@@ -41,6 +41,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "81:5432"
   redis:
     image: "redis:alpine"
     restart: always
