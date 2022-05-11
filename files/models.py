@@ -1202,7 +1202,7 @@ class Cue(models.Model):
         return "{0}{1} --> {2}\n{3}".format(identifier, format_time(self.start), format_time(self.end), self.text)
 
 
-class MediaLink(models.Model):
+class MediaLink(models.Model):  # TODO check
     """MediaLink model
     Describes what to show the user when asking for more
     info, depending on the time ib the video
