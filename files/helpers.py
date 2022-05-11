@@ -1,6 +1,6 @@
 # Kudos to Werner Robitza, AVEQ GmbH, for helping with ffmpeg
 # related content
-
+import datetime
 import hashlib
 import json
 import os
@@ -784,3 +784,7 @@ def clean_query(query):
         query = query.replace(char, "")
 
     return query.lower()
+
+
+def format_time(time: datetime.time):
+    return time.strftime("%H:%M:%S.%f")[:-3]

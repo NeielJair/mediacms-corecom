@@ -92,6 +92,16 @@ def add_subtitle(request):
     if request.method == "POST":
         form = SubtitleForm(media, request.POST, request.FILES)
         if form.is_valid():
+            buf = request.FILES['file'].read()
+            print("\n\n\n\tBuffer:")
+            print(buf)
+
+            subtitle = media.parse_subtitles(form.cleaned_data['language'], buf)
+
+            print("\n\n\n\tSubtitles:")
+            print(subtitle.build_vtt_buffer())
+            return HttpResponseRedirect("/")
+
             subtitle = form.save()
             messages.add_message(request, messages.INFO, "Subtitle was added!")
             return HttpResponseRedirect(subtitle.media.get_absolute_url())

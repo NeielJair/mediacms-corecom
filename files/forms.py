@@ -1,7 +1,7 @@
 from django import forms
 
 from .methods import get_next_state, is_mediacms_editor
-from .models import Media, Subtitle
+from .models import Media, Subtitle, Language
 
 
 class MultipleSelect(forms.CheckboxSelectMultiple):
@@ -60,19 +60,19 @@ class MediaForm(forms.ModelForm):
         return media
 
 
-class SubtitleForm(forms.ModelForm):
+class SubtitleForm(forms.Form):
+    language = forms.ModelChoiceField(queryset=Language.objects.all())
+    subtitle_file = forms.FileField(help_text="File has to be WebVTT format")
+    media = None
+
     class Meta:
-        model = Subtitle
         fields = ["language", "subtitle_file"]
 
     def __init__(self, media_item, *args, **kwargs):
         super(SubtitleForm, self).__init__(*args, **kwargs)
-        self.instance.media = media_item
-
-    def save(self, *args, **kwargs):
-        self.instance.user = self.instance.media.user
-        media = super(SubtitleForm, self).save(*args, **kwargs)
-        return media
+        self.fields["language"].label = "Language"
+        self.fields["subtitle_file"].label = "Subtitle/CC file"
+        self.media = media_item
 
 
 class ContactForm(forms.Form):

@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os
@@ -7,6 +8,7 @@ import tempfile
 import uuid
 
 import m3u8
+import webvtt
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
@@ -24,6 +26,7 @@ from imagekit.processors import ResizeToFit
 from mptt.models import MPTTModel, TreeForeignKey
 
 from . import helpers
+from .helpers import format_time
 from .stop_words import STOP_WORDS
 
 logger = logging.getLogger(__name__)
@@ -765,21 +768,25 @@ class Media(models.Model):
         return None
 
     @property
-    def subtitles_info(self):
+    def subtitles_info(self):  # TODO check
         """Property used on serializers
         Returns subtitles info
         """
 
+        raise Exception("NOT IMPLEMENTED")
         ret = []
         for subtitle in self.subtitles.all():
             ret.append(
                 {
-                    "src": helpers.url_from_path(subtitle.subtitle_file.path),
+                    "src": "helpers.url_from_path(subtitle.subtitle_file.path)",
                     "srclang": subtitle.language.code,
                     "label": subtitle.language.title,
                 }
             )
         return ret
+
+    def parse_subtitles(self, language, buffer):
+        return Subtitle.create_from_buffer(self.user, self, language, buffer)
 
     @property
     def sprites_url(self):
@@ -1145,17 +1152,85 @@ class Subtitle(models.Model):
 
     media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name="subtitles")
 
-    subtitle_file = models.FileField(
-        "Subtitle/CC file",
-        help_text="File has to be WebVTT format",
-        upload_to=subtitles_file_path,
-        max_length=500,
-    )
-
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+
+    @staticmethod
+    def create_from_buffer(user, media, language, file_buffer):
+        subtitle = Subtitle.objects.create(language=language, media=media, user=user)
+        vtt = webvtt.read_buffer(file_buffer)
+        cues = []
+        # for style in vtt.styles: ...
+        for caption in vtt.captions:
+            cues.append(Cue(
+                subtitle=subtitle,
+                start=caption.start,
+                end=caption.end,
+                text=caption.text,
+            ))
+        Cue.objects.bulk_create(cues)
+        return subtitle
+
+    def build_vtt_buffer(self) -> str:
+        buffer = "WEBVTT\n\n"
+        for cue in self.cues.all().order_by("start", "end"):
+            # TODO handle overlapping cues
+            buffer += str(cue) + "\n\n"
+        return buffer
 
     def __str__(self):
         return "{0}-{1}".format(self.media.title, self.language.title)
+
+
+class Cue(models.Model):
+    """Subtitle cues model
+    Each entry for a given Subtitle represents a cue as
+    seen inside a `WebVTT` file
+    """
+
+    subtitle = models.ForeignKey(Subtitle, on_delete=models.CASCADE, related_name="cues")
+
+    cue_identifier = models.CharField(max_length=250, null=True, blank=True)
+
+    start = models.TimeField(verbose_name="Start time")
+
+    end = models.TimeField(verbose_name="End time")
+
+    text = models.CharField(max_length=300, help_text="Subtitle text")
+
+    def __str__(self):
+        identifier = (self.cue_identifier + '\n') if self.cue_identifier else ''
+        return "{0}{1} --> {2}\n{3}".format(identifier, format_time(self.start), format_time(self.end), self.text)
+
+
+class MediaLink(models.Model):
+    """MediaLink model
+    Describes what to show the user when asking for more
+    info, depending on the time ib the video
+    """
+    class Type(models.TextChoices):
+        URL = "URL"
+        VIDEO_ID = "VIDEO"
+        PLAYLIST_ID = "PLAYLIST"
+        JS_SCRIPT = "JS"
+
+    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name="links")
+
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+
+    start = models.TimeField(verbose_name="Start time")
+
+    end = models.TimeField(verbose_name="End time")
+
+    content = models.CharField(max_length=300)
+
+    type = models.CharField(max_length=10, choices=Type.choices, verbose_name="Link name")
+
+    def get_link_type(self) -> Type:
+        return self.Type[self.type]
+
+    def __str__(self):
+        return "{0} --> {1}\n({2}) {3}".format(format_time(self.start), format_time(self.end),
+                                               self.get_link_type(), self.content)
 
 
 class RatingCategory(models.Model):
