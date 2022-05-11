@@ -167,6 +167,10 @@ def rm_dir(directory):
     return False
 
 
+def subtitle_path(filename):
+    return os.path.join(settings.MEDIA_ROOT, filename)
+
+
 def url_from_path(filename):
     # TODO: find a way to preserver http - https ...
     return "{0}{1}".format(settings.MEDIA_URL, filename.replace(settings.MEDIA_ROOT, ""))

@@ -22,6 +22,7 @@ services:
       - "80:80"
     volumes:
       - ./:/home/mediacms.io/mediacms/
+      - /home/mediacms.io/mediacms/venv  # Make sure venv is empty in container
     depends_on:
       redis:
         condition: service_healthy

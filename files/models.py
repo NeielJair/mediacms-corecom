@@ -768,24 +768,25 @@ class Media(models.Model):
         return None
 
     @property
-    def subtitles_info(self):  # TODO check
+    def subtitles_info(self):
         """Property used on serializers
         Returns subtitles info
         """
+        # TODO optimize maybe caching the subtitles file
 
-        raise Exception("NOT IMPLEMENTED")
         ret = []
         for subtitle in self.subtitles.all():
+            vtt_filedir = subtitle.write_vtt_to_file()
             ret.append(
                 {
-                    "src": "helpers.url_from_path(subtitle.subtitle_file.path)",
+                    "src": helpers.url_from_path(vtt_filedir),
                     "srclang": subtitle.language.code,
                     "label": subtitle.language.title,
                 }
             )
         return ret
 
-    def parse_subtitles(self, language, buffer):
+    def generate_subtitles(self, language, buffer):
         return Subtitle.create_from_buffer(self.user, self, language, buffer)
 
     @property
@@ -1171,11 +1172,20 @@ class Subtitle(models.Model):
         return subtitle
 
     def build_vtt_buffer(self) -> str:
+        """Build a string in WebVTT format with the subtitle data"""
         buffer = "WEBVTT\n\n"
         for cue in self.cues.all().order_by("start", "end"):
             # TODO handle overlapping cues
             buffer += str(cue) + "\n\n"
         return buffer
+
+    def write_vtt_to_file(self) -> str:
+        """Writes the subtitles to a .vtt file in media"""
+        vtt = self.build_vtt_buffer()
+        filedir = helpers.subtitle_path(str(self.language) + "-" + self.title + ".vtt")
+        with open(filedir, "w") as f:
+            File(f).write(vtt)
+        return filedir
 
     def __str__(self):
         return "{0}-{1}".format(self.media.title, self.language.title)

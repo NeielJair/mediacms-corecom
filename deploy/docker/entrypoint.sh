@@ -31,5 +31,6 @@ fi
 find /home/mediacms.io/ ! \( -user www-data -group $TARGET_GID \) -exec chown www-data:$TARGET_GID {} +
 
 chmod +x /home/mediacms.io/mediacms/deploy/docker/start.sh /home/mediacms.io/mediacms/deploy/docker/prestart.sh
+chmod a+rw /media  # TODO check if there's a better way to do this
 
 exec "$@"
