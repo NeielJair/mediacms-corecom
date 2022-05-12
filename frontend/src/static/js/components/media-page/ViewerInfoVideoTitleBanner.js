@@ -2,10 +2,10 @@ import React from 'react';
 import { formatViewsNumber } from '../../utils/helpers/';
 import { PageStore, MediaPageStore } from '../../utils/stores/';
 import { MemberContext, PlaylistsContext } from '../../utils/contexts/';
-import { MediaLikeIcon, MediaDislikeIcon, OtherMediaDownloadLink, VideoMediaDownloadLink, MediaSaveButton, MediaShareButton, MediaMoreOptionsIcon, MediaKnownledgeButton } from '../media-actions/';
+import { MediaLikeIcon, MediaDislikeIcon, OtherMediaDownloadLink, VideoMediaDownloadLink, MediaSaveButton, MediaShareButton, MediaMoreOptionsIcon, MediaKnowledgeButton } from '../media-actions/';
 import ViewerInfoTitleBanner from './ViewerInfoTitleBanner';
 
-function ViewKnownledgeButton(props) {
+function ViewKnowledgeButton(props) {
   let link = props.link;
 
   if (window.MediaCMS.site.devEnv) {
@@ -13,8 +13,8 @@ function ViewKnownledgeButton(props) {
   }
 
   return (
-    <a href={link} rel="nofollow" title="View knownledge" className="edit-subtitle">
-      VIEW KNOWNLEDGE
+    <a href={link} rel="nofollow" title="View knowledge" className="edit-subtitle">
+      VIEW KNOWLEDGE
     </a>
   );
 }
@@ -80,7 +80,7 @@ export default class ViewerInfoVideoTitleBanner extends ViewerInfoTitleBanner {
               {MemberContext._currentValue.can.dislikeMedia ? <MediaDislikeIcon /> : null}
               {MemberContext._currentValue.can.shareMedia ? <MediaShareButton isVideo={true} /> : null}
 
-              {'video' === MediaPageStore.get('media-data').media_type ? <MediaKnownledgeButton link={'#'}/> : null}
+              {'video' === MediaPageStore.get('media-data').media_type ? <MediaKnowledgeButton link={'#'}/> : null}
 
               {!MemberContext._currentValue.is.anonymous &&
                 MemberContext._currentValue.can.saveMedia &&

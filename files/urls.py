@@ -76,6 +76,11 @@ urlpatterns = [
         views.PlaylistDetail.as_view(),
         name="api_get_playlist",
     ),
+    re_path(
+        r"^api/v1/media/(?P<friendly_token>[\w]*)/comments$",
+        views.CommentDetail.as_view(),
+        name="api_get_knowledgebase",
+    ),
     re_path(r"^api/v1/user/action/(?P<action>[\w]*)$", views.UserActions.as_view()),
     # ADMIN VIEWS
     re_path(r"^api/v1/encode_profiles/$", views.EncodeProfileList.as_view()),

@@ -1283,6 +1283,48 @@ class CommentDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class KnowledgeBaseDetail(APIView):
+    """Knowledgebase related views
+    Knowledgebase for a media (GET)
+    """
+
+    permission_classes = (IsAuthorizedToAdd,)
+    parser_classes = (JSONParser, MultiPartParser, FormParser, FileUploadParser)
+
+    def get_object(self, friendly_token):
+        try:
+            media = Media.objects.select_related("user").get(friendly_token=friendly_token)
+            self.check_object_permissions(self.request, media)
+            if media.state == "private" and self.request.user != media.user:
+                return Response({"detail": "media is private"}, status=status.HTTP_400_BAD_REQUEST)
+            return media
+        except PermissionDenied:
+            return Response({"detail": "bad permissions"}, status=status.HTTP_400_BAD_REQUEST)
+        except BaseException:
+            return Response(
+                {"detail": "media file does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    @swagger_auto_schema(
+        manual_parameters=[],
+        tags=['Media'],
+        operation_summary='to_be_written',
+        operation_description='to_be_written',
+    )
+    def get(self, request, friendly_token):
+        media = self.get_object(friendly_token)
+        if isinstance(media, Response):
+            return media
+
+        comments = media.comments.filter().prefetch_related("user")
+        pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+        paginator = pagination_class()
+        page = paginator.paginate_queryset(comments, request)
+        serializer = CommentSerializer(page, many=True, context={"request": request})
+        return paginator.get_paginated_response(serializer.data)
+
+
 class UserActions(APIView):
     parser_classes = (JSONParser,)
 

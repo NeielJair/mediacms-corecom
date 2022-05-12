@@ -170,6 +170,12 @@ class MediaPageStore extends EventEmitter {
     getRequest(this.playlistsAPIUrl, !1, this.playlistsResponse);
   }
 
+  loadKnowledgebase() {
+    this.knowledgebaseAPIUrl = this.mediacms_config.api.media + '/' + MediaPageStoreData[this.id].mediaId + '/knowledgebase';
+    this.knowledgebaseResponse = this.knowledgebaseResponse.bind(this);
+    getRequest(this.commentsAPIUrl, !1, this.knowledgebaseResponse);
+  }
+
   dataResponse(response) {
     if (response && response.data) {
       MediaPageStoreData[this.id].data = response.data;
@@ -272,6 +278,13 @@ class MediaPageStore extends EventEmitter {
 
         i += 1;
       }
+    }
+  }
+
+  knowledgebaseResponse(response) {
+    if (response && response.data) {
+      MediaPageStoreData[this.id].knowledgebase = response.data.count ? response.data.results : [];
+      this.emit('knowledgebase_load');
     }
   }
 
@@ -415,6 +428,9 @@ class MediaPageStore extends EventEmitter {
         break;
       case 'media-comments':
         r = MediaPageStoreData[this.id].comments || [];
+        break;
+      case 'media-knowledgebase':
+        r = MediaPageStoreData[this.id].knowledgebase || [];
         break;
       case 'media-data':
         r = MediaPageStoreData[this.id].data || null;
