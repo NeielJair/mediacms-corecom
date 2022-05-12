@@ -1212,20 +1212,27 @@ class Cue(models.Model):
         return "{0}{1} --> {2}\n{3}".format(identifier, format_time(self.start), format_time(self.end), self.text)
 
 
-class MediaLink(models.Model):  # TODO check
-    """MediaLink model
+class KnowledgeBase(models.Model):
+    """KnowledgeBase model"""
+
+    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name="links")
+
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+
+
+class Knowledge(models.Model):
+    """Knowledge model
     Describes what to show the user when asking for more
     info, depending on the time ib the video
     """
+
     class Type(models.TextChoices):
         URL = "URL"
         VIDEO_ID = "VIDEO"
         PLAYLIST_ID = "PLAYLIST"
         JS_SCRIPT = "JS"
 
-    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name="links")
-
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    base = models.ForeignKey(KnowledgeBase, on_delete=models.CASCADE, related_name="knowledges")
 
     start = models.TimeField(verbose_name="Start time")
 
@@ -1233,14 +1240,14 @@ class MediaLink(models.Model):  # TODO check
 
     content = models.CharField(max_length=300)
 
-    type = models.CharField(max_length=10, choices=Type.choices, verbose_name="Link name")
+    type = models.CharField(max_length=10, choices=Type.choices, verbose_name="Knowledge type")
 
-    def get_link_type(self) -> Type:
+    def get_knowledge_type(self) -> Type:
         return self.Type[self.type]
 
     def __str__(self):
-        return "{0} --> {1}\n({2}) {3}".format(format_time(self.start), format_time(self.end),
-                                               self.get_link_type(), self.content)
+        return "{0} --> {1}\n({2}) {3}".format(format_time(self.start), format_time(self.end), self.get_link_type(),
+                                               self.content)
 
 
 class RatingCategory(models.Model):

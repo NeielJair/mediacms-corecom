@@ -18,18 +18,6 @@ class Migration(migrations.Migration):
             name='subtitle_file',
         ),
         migrations.CreateModel(
-            name='MediaLink',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start', models.TimeField(verbose_name='Start time')),
-                ('end', models.TimeField(verbose_name='End time')),
-                ('content', models.CharField(max_length=300)),
-                ('type', models.CharField(choices=[('URL', 'Url'), ('VIDEO', 'Video Id'), ('PLAYLIST', 'Playlist Id'), ('JS', 'Js Script')], max_length=10, verbose_name='Link name')),
-                ('media', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='links', to='files.media')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-        ),
-        migrations.CreateModel(
             name='Cue',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
