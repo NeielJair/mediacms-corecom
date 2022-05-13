@@ -104,10 +104,12 @@ def original_thumbnail_file_path(instance, filename):
     return settings.THUMBNAIL_UPLOAD_DIR + "user/{0}/{1}".format(instance.user.username, filename)
 
 
-def subtitles_file_path(instance, filename):
-    """Helper function to place subtitle file"""
+def subtitles_file_path(username, filename):
+    """Helper function to place subtitle file, this is used with Python's
+    file management system, not Django's unlike the other functions
+    """
 
-    return settings.SUBTITLES_UPLOAD_DIR + "user/{0}/{1}".format(instance.media.user.username, filename)
+    return os.path.join(settings.MEDIA_ROOT, settings.SUBTITLES_UPLOAD_DIR, "user", username, filename)
 
 
 def category_thumb_path(instance, filename):
@@ -1181,7 +1183,7 @@ class Subtitle(models.Model):
     def write_vtt_to_file(self) -> str:
         """Writes the subtitles to a .vtt file in media"""
         vtt = self.build_vtt_buffer()
-        filedir = helpers.subtitle_path(str(self.language) + "-" + self.title + ".vtt")
+        filedir = subtitles_file_path(self.user.username, F"{self.media.friendly_token}.{self.language}.vtt")
         with open(filedir, "w") as f:
             File(f).write(vtt)
         return filedir
