@@ -8,7 +8,7 @@ from .models import (
     Language,
     Media,
     Subtitle,
-    Tag,
+    Tag, Cue, Knowledge, KnowledgeBase,
 )
 
 
@@ -69,12 +69,24 @@ class LanguageAdmin(admin.ModelAdmin):
     pass
 
 
+class CueInline(admin.StackedInline):
+    model = Cue
+
+
 class SubtitleAdmin(admin.ModelAdmin):
-    pass
+    inlines = [CueInline]
 
 
 class EncodingAdmin(admin.ModelAdmin):
     pass
+
+
+class KnowledgeInline(admin.StackedInline):
+    model = Knowledge
+
+
+class KnowledgeBaseAdmin(admin.ModelAdmin):
+    inlines = [KnowledgeInline]
 
 
 admin.site.register(EncodeProfile, EncodeProfileAdmin)
@@ -84,4 +96,5 @@ admin.site.register(Encoding, EncodingAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Subtitle, SubtitleAdmin)
+admin.site.register(KnowledgeBase, KnowledgeBaseAdmin)
 admin.site.register(Language, LanguageAdmin)

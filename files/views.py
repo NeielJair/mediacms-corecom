@@ -50,7 +50,7 @@ from .models import (
     Media,
     Playlist,
     PlaylistMedia,
-    Tag,
+    Tag, KnowledgeBase,
 )
 from .serializers import (
     CategorySerializer,
@@ -1308,7 +1308,7 @@ class KnowledgeBaseDetail(APIView):
 
     @swagger_auto_schema(
         manual_parameters=[],
-        tags=['Media'],
+        tags=['Knowledge'],
         operation_summary='to_be_written',
         operation_description='to_be_written',
     )
@@ -1317,12 +1317,17 @@ class KnowledgeBaseDetail(APIView):
         if isinstance(media, Response):
             return media
 
-        comments = media.comments.filter().prefetch_related("user")
-        pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
-        paginator = pagination_class()
-        page = paginator.paginate_queryset(comments, request)
-        serializer = CommentSerializer(page, many=True, context={"request": request})
-        return paginator.get_paginated_response(serializer.data)
+        knowledgebase = KnowledgeBase.objects.filter(media=media, user=request.user).order_by('start', 'end')
+        response = [
+            {
+                "start": k.start,
+                "end": k.end,
+                "content": k.content,
+            }
+            for k in knowledgebase
+        ]  # TODO use a serializer
+
+        return Response(response)
 
 
 class UserActions(APIView):

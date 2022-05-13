@@ -1243,10 +1243,23 @@ class Knowledge(models.Model):
     type = models.CharField(max_length=10, choices=Type.choices, verbose_name="Knowledge type")
 
     def get_knowledge_type(self) -> Type:
-        return self.Type[self.type]
+        return Knowledge.Type[self.type]
+
+    def get_content(self):  # TODO implement
+        if self.type == Knowledge.Type.URL:
+            return self.content
+
+        elif self.type == Knowledge.Type.VIDEO_ID:
+            Exception("Unimplemented")
+
+        elif self.type == Knowledge.Type.PLAYLIST_ID:
+            Exception("Unimplemented")
+
+        elif self.type == Knowledge.Type.JS_SCRIPT:
+            Exception("Unimplemented")
 
     def __str__(self):
-        return "{0} --> {1}\n({2}) {3}".format(format_time(self.start), format_time(self.end), self.get_link_type(),
+        return "{0} --> {1}\n({2}) {3}".format(format_time(self.start), format_time(self.end), self.get_knowledge_type(),
                                                self.content)
 
 
