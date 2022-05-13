@@ -173,7 +173,7 @@ class MediaPageStore extends EventEmitter {
   loadKnowledgebase() {
     this.knowledgebaseAPIUrl = this.mediacms_config.api.media + '/' + MediaPageStoreData[this.id].mediaId + '/knowledgebase';
     this.knowledgebaseResponse = this.knowledgebaseResponse.bind(this);
-    getRequest(this.commentsAPIUrl, !1, this.knowledgebaseResponse);
+    getRequest(this.knowledgebaseAPIUrl, !1, this.knowledgebaseResponse);
   }
 
   dataResponse(response) {
@@ -193,6 +193,7 @@ class MediaPageStore extends EventEmitter {
     }
 
     this.loadPlaylists();
+    this.loadKnowledgebase();
 
     if (this.mediacms_config.member.can.readComment) {
       this.loadComments();
@@ -283,7 +284,7 @@ class MediaPageStore extends EventEmitter {
 
   knowledgebaseResponse(response) {
     if (response && response.data) {
-      MediaPageStoreData[this.id].knowledgebase = response.data.count ? response.data.results : [];
+      MediaPageStoreData[this.id].knowledgebase = response.data;
       this.emit('knowledgebase_load');
     }
   }
@@ -447,7 +448,7 @@ class MediaPageStore extends EventEmitter {
       case 'media-edit-subtitle-url':
         r =
           void 0 !== MediaPageStoreData[this.id].data &&
-          'string' === typeof MediaPageStoreData[this.id].data.add_subtitle_url
+            'string' === typeof MediaPageStoreData[this.id].data.add_subtitle_url
             ? MediaPageStoreData[this.id].data.add_subtitle_url
             : null;
         break;
@@ -525,8 +526,8 @@ class MediaPageStore extends EventEmitter {
         r =
           void 0 !== MediaPageStoreData[this.id].data && void 0 !== MediaPageStoreData[this.id].data.author_thumbnail
             ? this.mediacms_config.site.url +
-              '/' +
-              MediaPageStoreData[this.id].data.author_thumbnail.replace(/^\//g, '')
+            '/' +
+            MediaPageStoreData[this.id].data.author_thumbnail.replace(/^\//g, '')
             : null;
         break;
       case 'playlist-data':

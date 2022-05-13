@@ -31,7 +31,7 @@ from cms.permissions import IsAuthorizedToAdd, IsUserOrEditor, user_allowed_to_u
 from users.models import User
 
 from .forms import ContactForm, MediaForm, SubtitleForm
-from .helpers import clean_query, produce_ffmpeg_commands
+from .helpers import clean_query, produce_ffmpeg_commands, time_to_seconds
 from .methods import (
     get_user_or_session,
     is_mediacms_editor,
@@ -1317,16 +1317,15 @@ class KnowledgeBaseDetail(APIView):
         if isinstance(media, Response):
             return media
 
-        knowledgebase = KnowledgeBase.objects.filter(media=media, user=request.user).order_by('start', 'end')
+        knowledgebase = KnowledgeBase.objects.filter(media=media, user=request.user).first()
         response = [
             {
-                "start": k.start,
-                "end": k.end,
+                "start": time_to_seconds(k.start),
+                "end": time_to_seconds(k.end),
                 "content": k.content,
             }
-            for k in knowledgebase
+            for k in knowledgebase.knowledges.all().order_by('start', 'end')
         ]  # TODO use a serializer
-
         return Response(response)
 
 

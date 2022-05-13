@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CircleIconButton, MaterialIcon } from '../_shared/';
-import {MediaPageStore} from "../../utils/stores";
+import { MediaPageStore } from "../../utils/stores";
 
 function getTimestamp() {
   const videoPlayer = document.getElementsByTagName("video");
@@ -8,10 +8,11 @@ function getTimestamp() {
 }
 
 function redirectToKnowledge() {
-  let url;
+  const knowledgebase = MediaPageStore.get('media-knowledgebase');
   const timestamp = getTimestamp();
-  if (timestamp) {
-    const knowledge = MediaPageStore.get('media-knowledgebase').find(k => k.start <= timestamp && timestamp <= k.end);
+  let url;
+  if (knowledgebase && timestamp) {
+    const knowledge = knowledgebase.find(k => k.start <= timestamp && timestamp < k.end);
     url = knowledge?.content;
   }
 
@@ -23,12 +24,12 @@ function redirectToKnowledge() {
 export function MediaKnowledgeButton(props) {
   return (
     <div className="download">
-        <button onClick={redirectToKnowledge}>
-          <CircleIconButton type="span">
-            <MaterialIcon type="lightbulb" />
-          </CircleIconButton>
-          <span>KNOWLEDGE</span>
-        </button>
+      <button onClick={redirectToKnowledge}>
+        <CircleIconButton type="span">
+          <MaterialIcon type="lightbulb" />
+        </CircleIconButton>
+        <span>KNOWLEDGE</span>
+      </button>
     </div>
   );
 }

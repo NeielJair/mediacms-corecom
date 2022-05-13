@@ -792,3 +792,7 @@ def clean_query(query):
 
 def format_time(time: datetime.time):
     return time.strftime("%H:%M:%S.%f")[:-3]
+
+
+def time_to_seconds(time: datetime.time):
+    return (time.hour * 60 + time.minute) * 60 + time.second + time.microsecond / 1000000
