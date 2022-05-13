@@ -1316,8 +1316,10 @@ class KnowledgeBaseDetail(APIView):
         media = self.get_object(friendly_token)
         if isinstance(media, Response):
             return media
-
         knowledgebase = KnowledgeBase.objects.filter(media=media, user=request.user).first()
+        if not knowledgebase:
+            return Response()
+
         response = [
             {
                 "start": time_to_seconds(k.start),
