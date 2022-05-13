@@ -1241,9 +1241,6 @@ class Knowledge(models.Model):
 
     type = models.CharField(max_length=10, choices=Type.choices, verbose_name="Knowledge type")
 
-    def get_knowledge_type(self) -> Type:
-        return Knowledge.Type[self.type]
-
     def get_content(self):  # TODO implement
         if self.type == Knowledge.Type.URL:
             return self.content
@@ -1258,7 +1255,7 @@ class Knowledge(models.Model):
             Exception("Unimplemented")
 
     def __str__(self):
-        return "{0} --> {1}\n({2}) {3}".format(format_time(self.start), format_time(self.end), self.get_knowledge_type(),
+        return "{0} --> {1}\n({2}) {3}".format(format_time(self.start), format_time(self.end), self.type,
                                                self.content)
 
 
